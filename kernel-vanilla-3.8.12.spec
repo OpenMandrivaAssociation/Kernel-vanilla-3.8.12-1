@@ -103,6 +103,11 @@ Packager: Nicolo' Costanza <abitrules@yahoo.it>
 %{?_with_source: %global build_source 1}
 %{?_with_devel: %global build_devel 1}
 
+
+############################################################
+### Linker start1 > Check point to build for cooker 2013 ###
+############################################################
+%if %{mdvver} < 201300
 %if %(if [ -z "$CC" ] ; then echo 0; else echo 1; fi)
 %define kmake %make CC="$CC"
 %else
@@ -110,6 +115,31 @@ Packager: Nicolo' Costanza <abitrules@yahoo.it>
 %endif
 # there are places where parallel make don't work
 %define smake make
+%endif
+
+%if %{mdvver} == 201300
+%if %cross_compiling
+%if %(if [ -z "$CC" ] ; then echo 0; else echo 1; fi)
+%define kmake %make ARCH=%target_arch CROSS_COMPILE=%(echo %__cc |sed -e 's,-gcc,-,') CC="$CC" LD="$LD" LDFLAGS="$LDFLAGS"
+%else
+%define kmake %make ARCH=%target_arch CROSS_COMPILE=%(echo %__cc |sed -e 's,-gcc,-,') LD="$LD" LDFLAGS="$LDFLAGS"
+%endif
+# there are places where parallel make don't work
+%define smake make ARCH=%target_arch CROSS_COMPILE=%(echo %__cc |sed -e 's,-gcc,-,') LD="$LD" LDFLAGS="$LDFLAGS"
+%else
+%if %(if [ -z "$CC" ] ; then echo 0; else echo 1; fi)
+%define kmake %make CC="$CC" LD="$LD" LDFLAGS="$LDFLAGS"
+%else
+%define kmake %make LD="$LD" LDFLAGS="$LDFLAGS"
+%endif
+# there are places where parallel make don't work
+%define smake make LD="$LD" LDFLAGS="$LDFLAGS"
+%endif
+%endif
+############################################################
+###  Linker end1 > Check point to build for cooker 2013  ###
+############################################################
+
 
 # Parallelize xargs invocations on smp machines
 %define kxargs xargs %([ -z "$RPM_BUILD_NCPUS" ] \\\
@@ -485,6 +515,19 @@ LC_ALL=C perl -p -i -e "s/^SUBLEVEL.*/SUBLEVEL = %{sublevel}/" linux-%{tar_ver}/
 
 
 %build
+
+############################################################
+### Linker start2 > Check point to build for cooker 2013 ###
+############################################################
+%if %{mdvver} == 201300
+# Make sure we don't use gold
+export LD="%{_target_platform}-ld.bfd"
+export LDFLAGS="--hash-style=sysv --build-id=none"
+%endif
+############################################################
+###  Linker end2 > Check point to build for cooker 2013  ###
+############################################################
+
 # Common target directories
 %define _bootdir /boot
 %define _modulesdir /lib/modules
