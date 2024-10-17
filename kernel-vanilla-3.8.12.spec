@@ -159,7 +159,7 @@ License: 	GPLv2
 Group: 		System/Kernel and hardware
 ExclusiveArch: 	%{ix86} x86_64 %{arm}
 ExclusiveOS: 	Linux
-URL: 		http://www.kernel.org/
+URL: 		https://www.kernel.org/
 
 ####################################################################
 #
